@@ -155,11 +155,7 @@ http://127.0.0.1:8000/
 
 ---
 
-## 🎥 Dashboard Demo
 
-(Add `assets/demo.gif` here)
-
----
 
 ## 🧪 API Usage
 
