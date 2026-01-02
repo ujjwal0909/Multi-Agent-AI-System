@@ -1,0 +1,1502 @@
+[
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 0,
+    "text": "CSE 5306: Distributed Systems\nFault Tolerance\nJiayi Meng\nhttp://ranger.uta.edu/~jmeng/ \n[Recap] Goals of Distributed Systems\n1. Performance and dependability\n2. Scalability\n3. Distribution transparency\n4. … \n1\n[Recap] Dependability\n• Availability: Ready to be used immediately\n• Reliability: Run continuously without failures\n• Safety: No catastrophic event\n• Maintainability: Easy to repair\n2\nDifferent Types of \nNode/Communication Failures\n3\nHow to"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 1,
+    "text": "ility: Easy to repair\n2\nDifferent Types of \nNode/Communication Failures\n3\nHow to Achieve Failure Transparency?\n4\nFailure Can be Masked by Redundancy\n• Information redundancy\n• Extra bits are added to be able to recover from errors, e.g., Hamming code\n• Time redundancy\n• The same action is performed multiple times\n• Physical redundancy (in both hardware and software)\n• Extra equipment or processes are added to tolerate malfunctioning components\n5"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 2,
+    "text": "Extra equipment or processes are added to tolerate malfunctioning components\n5\nHow to Tolerate a Faulty Process?\n• Key approach: Organize several identical processes into a group\n• Replicate processes and organize them into a group\n• A group of processes jointly behave as a single, highly robust process\n• Key property of the group\n• When a message is sent to the group itself, all members of the group receive it\n→ If one process in a group fails,"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 3,
+    "text": "p itself, all members of the group receive it\n→ If one process in a group fails, some other processes can take over for it\n• A process can send a message to a group of servers \n• The group appears to be a single, logical process\n• W/o having to know who they are, how many there are, or where they are\n6\nHow to Approach Such Replication?\n• Primary-based protocols\n• A group of processes is organized in a \nhierarchical fashion\n• Replicated-write prot"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 4,
+    "text": "oup of processes is organized in a \nhierarchical fashion\n• Replicated-write protocols\n7\nFlat group\nHierarchical group Coordinator\nWorker\nHow to Reach Consensus?\n• A fundamental problem in fault-tolerant distributed systems\n• A consensus algorithm is a process to achieve agreement on a single data \nvalue among distributed processes\n• To replicate changes on different processes\n• A simple approach is to send them in order\n• What’s the potential iss"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 5,
+    "text": "rocesses\n• A simple approach is to send them in order\n• What’s the potential issue?\n8\nDistributed Commit\n• Requires an operation being performed by all processes in the group or \nnone at all\n• Distributed atomic transaction\n• It is often achieved by means of a coordinator\n• One-phase commit protocol\n• The coordinator tells everyone what to do\n• However, no feedback when a member may fail to perform\n• Two-phase commit protocol (2PC)\n• Three-phase"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 6,
+    "text": "en a member may fail to perform\n• Two-phase commit protocol (2PC)\n• Three-phase commit protocol (3PC)\n9\nTwo-Phase Commit (2PC)\nCOMMIT\nINIT\nREADY\nABORT\nVote-request\nVote-commit\nVote-request\nVote-abort\nGlobal-abort\nACK\nGlobal-commit\nACK\n10\nCOMMIT\nINIT\nWAIT\nABORT\nCommit\nVote-request\nVote-abort\nGlobal-abort\nVote-commit\nGlobal-commit\nFinite State Machine \nfor Coordinator\nFinite State Machine \nfor Participant\nVoting \nPhase\nDecision \nPhase\nBrainstorm: H"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 7,
+    "text": "inite State Machine \nfor Participant\nVoting \nPhase\nDecision \nPhase\nBrainstorm: How to Deal with Failures?\n• What if coordinator is blocked in WAIT?\n• What if participant is blocked in READY?\n11\n\nPRECOMMIT\nCOMMIT\nINIT\nWAIT\nABORT\nCommit\nVote-request\nVote-abort\nGlobal-abort\nVote-commit\nPrepare-commit\nReady-commit\nGlobal-commit\nHomework: Three-Phase Commit (3PC)\n12\nFinite State Machine \nfor Coordinator\nFinite State Machine \nfor Participant\nPRECOMMIT"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 8,
+    "text": "State Machine \nfor Coordinator\nFinite State Machine \nfor Participant\nPRECOMMIT\nCOMMIT\nINIT\nREADY\nABORT\nVote-request\nVote-commit\nVote-request\nVote-abort\nGlobal-abort\nACK\nPrepare-commit\nReady-commit\nGlobal-commit\nACK\nHow to Achieve K-Fault Tolerance?\n• Consider replicated-write systems\n• K-fault tolerance\n• The system can survive faults in k components and still meet its specifications\n• How many processes at least are needed?\n• If k components fa"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 9,
+    "text": "ts specifications\n• How many processes at least are needed?\n• If k components fail silently\n• If k components exhibit Byzantine failures\n• Continue to run and send out erroneous or random replies\n13\nHow to Reach Consensus in Faulty \nSystems with Crash Failures?\n• Consensus: Commit operations in the same order\n• Values are the same\n• Achieving consensus is easy when there are no failures\n• Either need a system-wide coordinator\n• Or perform totally"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 10,
+    "text": "ere are no failures\n• Either need a system-wide coordinator\n• Or perform totally-ordered multicast or casually-ordered multicast \n14\nRaft\n• Raft: A distributed consensus algorithm\n• Primary-backup protocol\n• Primary: Leader\n• Backups: Followers\n• Each node/server maintains \n• Three states: leader, follower, candidate\n• A log of operations\n• Log contains operations: (1) have already been committed; (2) are pending\n• Log: <o, t, k>\n• t: The term un"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 11,
+    "text": ") have already been committed; (2) are pending\n• Log: <o, t, k>\n• t: The term under which the current leader serves\n• k: The index of o in the leader’s log\n• Current election term\n15\nRaft: Leader Election\n• Two timeout settings are maintained: heartbeat and election \n• Leader send periodic heartbeats to all followers\n• If follower receives no communication over a period of time (election), it \nbegins a new term and a leader election → Follower be"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 12,
+    "text": "od of time (election), it \nbegins a new term and a leader election → Follower becomes candidate\n• Increment its current term\n• Request all servers to vote\n• Each server votes for at most one candidate on a first-come-first-served basis\n• Server will not vote for candidate, if it has more up-to-date log\n• Compare index and term of the last entries in logs\n• If logs end with the same term, whichever log is longer is more up -to-date\n• Wins the elec"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 13,
+    "text": "with the same term, whichever log is longer is more up -to-date\n• Wins the election if it receives votes from a majority of the servers\n• Then sends heartbeat to all followers\n16\nRaft: More about Leader Election\n• No winner due to a split vote → Some follower starts a new term\n• How to avoid split vote?\n• Election timeouts are chosen randomly from a fixed interval\n• E.g., 150-300 ms\n• This spreads out the servers → In most cases only a single se"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 14,
+    "text": "E.g., 150-300 ms\n• This spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 15,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 16,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 17,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 18,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 19,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 20,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 21,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 22,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 23,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 24,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 25,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 26,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 27,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 28,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 29,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 30,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 31,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 32,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 33,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 34,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 35,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 36,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 37,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 38,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 39,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 40,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 41,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 42,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 43,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 44,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 45,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 46,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 47,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 48,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 49,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 50,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 51,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 52,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 53,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 54,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 55,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 56,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 57,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 58,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 59,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 60,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 61,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 62,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 63,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 64,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 65,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 66,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 67,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 68,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 69,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 70,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 71,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 72,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 73,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 74,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 75,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 76,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 77,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 78,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 79,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 80,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 81,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 82,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 83,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 84,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 85,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 86,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 87,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 88,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 89,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 90,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 91,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 92,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 93,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 94,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 95,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 96,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 97,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 98,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 99,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 100,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 101,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 102,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 103,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 104,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 105,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 106,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 107,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 108,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 109,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 110,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 111,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 112,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 113,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 114,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 115,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 116,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 117,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 118,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 119,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 120,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 121,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 122,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 123,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 124,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 125,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 126,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 127,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 128,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 129,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 130,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 131,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 132,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 133,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 134,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 135,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 136,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 137,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 138,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 139,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 140,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 141,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 142,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 143,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 144,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 145,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 146,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 147,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 148,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 149,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 150,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 151,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 152,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 153,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 154,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 155,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 156,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 157,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 158,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 159,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 160,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 161,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 162,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 163,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 164,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 165,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 166,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 167,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 168,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 169,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 170,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 171,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 172,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 173,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 174,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 175,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 176,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 177,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 178,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 179,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 180,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 181,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 182,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 183,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 184,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 185,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 186,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 187,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 188,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 189,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 190,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 191,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 192,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 193,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 194,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 195,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 196,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 197,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 198,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 199,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 200,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 201,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 202,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 203,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 204,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 205,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 206,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 207,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 208,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 209,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 210,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 211,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 212,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 213,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 214,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 215,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 216,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 217,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 218,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 219,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 220,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 221,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 222,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 223,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 224,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 225,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 226,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 227,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 228,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 229,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 230,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 231,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 232,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 233,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 234,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 235,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 236,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 237,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 238,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 239,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 240,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 241,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 242,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 243,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 244,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 245,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 246,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 247,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 248,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 249,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 250,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 251,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 252,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 253,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 254,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 255,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 256,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 257,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 258,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 259,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 260,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 261,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 262,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 263,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 264,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 265,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 266,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 267,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 268,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 269,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 270,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 271,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 272,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 273,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 274,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 275,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 276,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 277,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 278,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 279,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 280,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 281,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 282,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 283,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 284,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 285,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 286,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 287,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 288,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 289,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 290,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 291,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 292,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 293,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 294,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 295,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 296,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 297,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 298,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  },
+  {
+    "source": "Lec10-Fault_Tolerance.pdf",
+    "chunk_id": 299,
+    "text": "is spreads out the servers → In most cases only a single server will time out\n17"
+  }
+]
